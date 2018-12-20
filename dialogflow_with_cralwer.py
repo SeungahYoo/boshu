@@ -16,7 +16,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-XP00RFfYud81gqmqu2Dm6Mfh'
+slack_token = 'xoxb-503818135714-506852761857-dRkgyJZsqBxqK04boHmUXUz0'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
@@ -77,57 +77,63 @@ def _event_handler(event_type, slack_event):
         text = slack_event["event"]["text"]
         userid = slack_event["event"]["user"]
 
-        if text.find("reset") != -1:
-            del user_list[userid]
-            feedback = '나중에 다시 불러주세요'
-            return talk_bot(feedback, channel)
-
-        else:
-            if userid not in user_list:
-                print("되고이따11")
-                user_list[userid] = []
-                feedback = '드라마, 예능, 시사 중 선택해주세요.'
+        try:
+            if text.find("reset") != -1:
+                del user_list[userid]
+                feedback = '나중에 다시 불러주세요'
                 return talk_bot(feedback, channel)
 
             else:
-                print("여기이따22")
-                dialog_answer = get_answer(text, userid)
-                print(dialog_answer)
-                answer = dialog_answer['speech'].split()[1]
-                if len(user_list[userid]) == 0:
-                    if answer not in ['드라마', '예능', '시사']:
-                        user_list[userid] = []
-                        feedback = '꼭! 드라마, 예능, 시사 중 선택해주세요.'
-                        return talk_bot(feedback, channel)
-                    else:
-                        user_list[userid].append(answer)
-                        feedback = '제목을 입력해주세요.'
-                        return talk_bot(feedback, channel)
-                elif len(user_list[userid]) == 1:
-                    user_list[userid].append(answer)
-                    feedback = _crawl_naver_keywords(make_query(user_list[userid]))
-                    # user_list[userid] = []
-                    print(feedback)
-                    thumbnail = json.dumps([
-                        {
-                            "color": "#ffffff",
-                            "title": "Program Thumbnail",
-                            "image_url": feedback[0]
-                        }
-                    ])
-                    sc.api_call(
-                        "chat.postMessage",
-                        channel=channel,
-                        attachments=thumbnail
-                    )
-                    print(feedback[0])
-                    for i in range(1, len(feedback)):
-                        slack.chat.post_message(channel=channel, text=feedback[i])
-                    # del user_list[userid]
-                    text = 'reset'
-                    return make_response("App mention message has been sent", 200, )
-                print(answer)
+                if userid not in user_list:
+                    print("되고이따11")
+                    user_list[userid] = []
+                    feedback = '드라마, 예능, 시사 중 선택해주세요.'
+                    return talk_bot(feedback, channel)
 
+                else:
+                    print("여기이따22")
+                    dialog_answer = get_answer(text, userid)
+                    print(dialog_answer)
+                    answer = dialog_answer['speech'].split()[1]
+                    if len(user_list[userid]) == 0:
+                        if answer not in ['드라마', '예능', '시사']:
+                            user_list[userid] = []
+                            feedback = '꼭! 드라마, 예능, 시사 중 선택해주세요.'
+                            return talk_bot(feedback, channel)
+                        else:
+                            user_list[userid].append(answer)
+                            feedback = '제목을 입력해주세요.'
+                            return talk_bot(feedback, channel)
+                    elif len(user_list[userid]) == 1:
+                        user_list[userid].append(answer)
+                        feedback = _crawl_naver_keywords(make_query(user_list[userid]))
+                        # user_list[userid] = []
+                        print(feedback)
+                        thumbnail = json.dumps([
+                            {
+                                "color": "#ffffff",
+                                "title": "Program Thumbnail",
+                                "image_url": feedback[0]
+                            }
+                        ])
+                        sc.api_call(
+                            "chat.postMessage",
+                            channel=channel,
+                            attachments=thumbnail
+                        )
+                        print(feedback[0])
+                        for i in range(1, len(feedback)):
+                            slack.chat.post_message(channel=channel, text=feedback[i])
+                        del user_list[userid]
+                        text = 'reset'
+                        return make_response("App mention message has been sent", 200, )
+                    print(answer)
+        except:
+            try:
+                del user_list[userid]
+            except:
+                text = 'reset'
+            talk_bot("나중에 다시 불러주세요", channel)
         #keywords = _crawl_naver_keywords(answer)
 
         # slack.chat.post_message(channel=channel, text=feedback)
