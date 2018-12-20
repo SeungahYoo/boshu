@@ -16,7 +16,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-Wmthmq6Yruiy4BMxACJh9sj3'
+slack_token = 'xoxb-503818135714-506852761857-zq1eq3yW7kionUW4fU3Zmo9j'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
@@ -71,22 +71,6 @@ def _event_handler(event_type, slack_event):
         if text.find("reset") != -1:
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
-
-            thumbnail = json.dumps([
-                {
-                    "color": "#ffffff",
-                    "title": "Program Thumbnail",
-                    "image_url": feedback[0]
-                }
-            ])
-
-
-            sc.api_call(
-                "chat.postMessage",
-                channel=channel,
-                text=feedback,
-                attachments=thumbnail
-            )
             return make_response("App mention message has been sent", 200, )
 
         if userid not in user_list:
@@ -114,9 +98,20 @@ def _event_handler(event_type, slack_event):
             elif len(user_list[userid]) == 1:
                 user_list[userid].append(answer)
                 feedback = _crawl_naver_keywords(make_query(user_list[userid]))
-                del user_list[userid]
+                user_list[userid] = []
                 print(feedback)
-                slack.files.upload(content=feedback[0])
+                thumbnail = json.dumps([
+                    {
+                        "color": "#ffffff",
+                        "title": "Program Thumbnail",
+                        "image_url": feedback[0]
+                    }
+                ])
+                sc.api_call(
+                    "chat.postMessage",
+                    channel=channel,
+                    attachments=thumbnail
+                )
                 print(feedback[0])
                 for i in range(1, len(feedback)):
                     slack.chat.post_message(channel=channel, text=feedback[i])
