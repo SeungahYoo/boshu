@@ -16,7 +16,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-V1xcxpKanO7YOWXSZYFIhsd2'
+slack_token = 'xoxb-503818135714-506852761857-Wmthmq6Yruiy4BMxACJh9sj3'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'

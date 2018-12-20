@@ -13,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/dialogflow_with_cralwer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="84">
-              <caret line="100" column="84" selection-start-line="100" selection-start-column="84" selection-end-line="100" selection-end-column="84" />
+            <state relative-caret-position="-1083">
+              <caret line="18" column="70" selection-start-line="18" selection-start-column="70" selection-end-line="18" selection-end-column="70" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -141,6 +141,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="540" y="0" width="1387" height="1047" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18087472" />
@@ -174,8 +175,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dialogflow_with_cralwer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="100" column="84" selection-start-line="100" selection-start-column="84" selection-end-line="100" selection-end-column="84" />
+        <state relative-caret-position="-1083">
+          <caret line="18" column="70" selection-start-line="18" selection-start-column="70" selection-end-line="18" selection-end-column="70" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
