@@ -71,10 +71,21 @@ def _event_handler(event_type, slack_event):
         if text.find("reset") != -1:
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
+
+            thumbnail = json.dumps([
+                {
+                    "color": "#ffffff",
+                    "title": "Program Thumbnail",
+                    "image_url": feedback[0]
+                }
+            ])
+
+
             sc.api_call(
                 "chat.postMessage",
                 channel=channel,
-                text=feedback
+                text=feedback,
+                attachments=thumbnail
             )
             return make_response("App mention message has been sent", 200, )
 
