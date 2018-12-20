@@ -37,7 +37,7 @@ def _crawl_naver_keywords(text):
     result = []
     timetable=[]
     times=[]
-    img=[]
+    idx=[]
 
 
     if "naver" in url:
@@ -80,19 +80,24 @@ def _crawl_naver_keywords(text):
 
 
         i=0
-        for detail in soup.find_all("td", class_="today"): #편성 시간
+        for detail in soup.find_all("td", class_="today"): #편성 시간, 회차
 
             times.clear()
+            idx.clear()
             for time in detail.find_all("span", class_="time_min"):
 
 
-                #print(time.get_text())
+
                 if not time.get_text() in times:
                     times.append(time.get_text())
 
+            for index in detail.find_all("em", class_="count"):
+                idx.append(index.get_text())
+                print(idx)
+
             if(len(times)!=0):
                 for j in range(len(times)) :
-                    table[i]= table[i] + " " + times[j] + " |"
+                    table[i]= table[i] + " " + times[j] +"(_"+idx[j]+"_) |"
                 timetable.append(table[i])
 
             i+=1
@@ -110,14 +115,14 @@ def _crawl_naver_keywords(text):
 
     result.append("*"+titles[0]+"*" + " (" + info[0] + ")")
     result.append(sche[0])
-    result.append("_<편성표>_ "+date[0])
+    result.append("_<오늘의 편성표>_ "+date[0])
 
     for i in range(0,len(timetable)):
         result.append(timetable[i])
     #result.append(timetable)
 
 
-
+    print(result)
 
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
@@ -125,7 +130,7 @@ def _crawl_naver_keywords(text):
     # return u'\n'.join(result)
     return result
 
-# if __name__ == '__main__':
-#     text="드라마 남자친구"
-#     _crawl_naver_keywords(text)
+if __name__ == '__main__':
+    text="드라마 남자친구"
+    _crawl_naver_keywords(text)
 
