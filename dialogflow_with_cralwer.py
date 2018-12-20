@@ -16,7 +16,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-zq1eq3yW7kionUW4fU3Zmo9j'
+slack_token = 'xoxb-503818135714-506852761857-XP00RFfYud81gqmqu2Dm6Mfh'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
@@ -71,7 +71,6 @@ def _event_handler(event_type, slack_event):
         if text.find("reset") != -1:
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
-            return make_response("App mention message has been sent", 200, )
 
         if userid not in user_list:
             print("되고이따11")
