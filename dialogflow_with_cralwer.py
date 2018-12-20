@@ -4,6 +4,9 @@ import os
 import re
 import urllib.request
 import ast
+from crawl import _crawl_naver_keywords
+
+from slacker import Slacker
 
 import requests
 
@@ -13,11 +16,12 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-QIBIrSUj6VgP5VdZIkeIyIJr'
+slack_token = 'xoxb-503818135714-506852761857-V1xcxpKanO7YOWXSZYFIhsd2'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
 sc = SlackClient(slack_token)
+slack = Slacker(slack_token)
 
 # boshu와 대화를 하는 user
 user_list = {}
@@ -53,7 +57,6 @@ def make_query(text):
     for i in text:
         result += i
         result += ' '
-    result += '편성표'
     return result
 
 # 이벤트 핸들하는 함수
@@ -66,7 +69,6 @@ def _event_handler(event_type, slack_event):
         userid = slack_event["event"]["user"]
 
         if text.find("reset") != -1:
-            print("말도안된다")
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
             sc.api_call(
@@ -100,14 +102,19 @@ def _event_handler(event_type, slack_event):
                 feedback = '제목을 입력해주세요.'
             elif len(user_list[userid]) == 1:
                 user_list[userid].append(answer)
-                feedback = make_query(user_list[userid])
+                feedback = _crawl_naver_keywords(make_query(user_list[userid]))
                 del user_list[userid]
                 print(feedback)
+                slack.files.upload(content=feedback[0])
+                print(feedback[0])
+                for i in range(1, len(feedback)):
+                    slack.chat.post_message(channel=channel, text=feedback[i])
+                return make_response("App mention message has been sent", 200, )
             print(answer)
 
-        print(feedback)
-
         #keywords = _crawl_naver_keywords(answer)
+
+        # slack.chat.post_message(channel=channel, text=feedback)
         sc.api_call(
             "chat.postMessage",
             channel=channel,

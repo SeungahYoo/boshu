@@ -122,12 +122,10 @@ def _crawl_naver_keywords(text):
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
 
-    print(result)
+    # return u'\n'.join(result)
+    return result
 
-    return u'\n'.join(result)
-
-
-if __name__ == '__main__':
-    text="드라마 남자친구"
-    _crawl_naver_keywords(text)
+# if __name__ == '__main__':
+#     text="드라마 남자친구"
+#     _crawl_naver_keywords(text)
 
