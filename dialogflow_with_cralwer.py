@@ -13,47 +13,16 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-ElsWv0jr7wBR2dXzJPUqlSAO'
+slack_token = 'xoxb-503818135714-506852761857-i8QhhD6zrEQlRhAi2qn4yfvD'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
 sc = SlackClient(slack_token)
 
+# boshu와 대화를 하는 user
+user_list = {}
 
-# 크롤링 함수 구현하기
-def _crawl_naver_keywords(text):
-    if text.find('die') != -1:
-        url = "http://hub.zum.com/daily/15820"
-    else:
-        return "잘 모르겠어요"
-
-    req = urllib.request.Request(url)
-
-    sourcecode = urllib.request.urlopen(url).read()
-    soup = BeautifulSoup(sourcecode, "html.parser")
-
-    result = ["죽기 전에 꼭 가봐야 할 여행지!"]
-    pl = []
-    pi = []
-
-    for place in soup.find_all("h3", class_="sub_title"):
-        pl.append(place.get_text())
-
-    for pic in soup.find_all("table", class_="img_block"):
-        picture = pic.find("img")
-        if 'data-src' in str(picture):
-            pi.append(picture['data-src'])
-        else:
-            pi.append(picture['src'])
-
-    # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
-
-    for i in range(0, 10):
-        result.append(pl[i] + ' ' + pi[i])
-
-        # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
-    return u'\n'.join(result)
-
+#dialogFlow 에 text 를 넣고 그것에 대한 대답을 dictionary타입으로 받는다.
 def get_answer(text, user_key):
     data_send = {
         'query': text,
@@ -62,7 +31,7 @@ def get_answer(text, user_key):
     }
 
     data_header = {
-        'Authorization': 'Bearer 6c91a8f1f98a44b4b467d90bab41d1d0',
+        'Authorization': 'Bearer 7af062e799994609aea8846103f61084',
         'Content-Type': 'application/json; charset=utf-8'
     }
 
@@ -79,6 +48,14 @@ def get_answer(text, user_key):
     }
     return result
 
+def make_query(text):
+    result = ''
+    for i in text:
+        result += i
+        result += ' '
+    result += '편성표'
+    return result
+
 # 이벤트 핸들하는 함수
 def _event_handler(event_type, slack_event):
     print(slack_event["event"])
@@ -86,17 +63,50 @@ def _event_handler(event_type, slack_event):
     if event_type == "app_mention":
         channel = slack_event["event"]["channel"]
         text = slack_event["event"]["text"]
-        userid = "session"
+        userid = slack_event["event"]["user"]
 
-        answer = get_answer(text, userid)["speech"]
+        if text.find("reset") != -1:
+            user_list[userid] = []
+            feedback = '드라마, 예능, 시사 중 선택해주세요.'
+            sc.api_call(
+                "chat.postMessage",
+                channel=channel,
+                text=feedback
+            )
+            return make_response("App mention message has been sent", 200, )
 
-        print(answer)
+        if userid not in user_list:
+            user_list[userid] = []
+            feedback = '드라마, 예능, 시사 중 선택해주세요.'
 
-        keywords = _crawl_naver_keywords(answer)
+        else:
+            dialog_answer = get_answer(text, userid)
+            print(dialog_answer)
+            answer = dialog_answer['speech'].split()[1]
+            if len(user_list[userid]) == 0:
+                if answer not in ['드라마', '예능', '시사']:
+                    user_list[userid] = []
+                    feedback = '드라마, 예능, 시사 중 선택해주세요.'
+                    sc.api_call(
+                        "chat.postMessage",
+                        channel=channel,
+                        text=feedback
+                    )
+                    return make_response("App mention message has been sent", 200, )
+                user_list[userid].append(answer)
+                feedback = '제목을 입력해주세요.'
+            elif len(user_list[userid]) == 1:
+                user_list[userid].append(answer)
+                feedback = make_query(user_list[userid])
+                del user_list[userid]
+                print(feedback)
+            print(answer)
+
+        #keywords = _crawl_naver_keywords(answer)
         sc.api_call(
             "chat.postMessage",
             channel=channel,
-            text=keywords
+            text=feedback
         )
 
         return make_response("App mention message has been sent", 200, )
@@ -130,6 +140,8 @@ def hears():
     # send a quirky but helpful error response
     return make_response("[NO EVENT IN SLACK REQUEST] These are not the droids\
                          you're looking for.", 404, {"X-Slack-No-Retry": 1})
+
+
 
 
 
