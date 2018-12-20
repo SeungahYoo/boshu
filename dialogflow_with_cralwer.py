@@ -13,7 +13,7 @@ from flask import Flask, request, make_response, render_template, jsonify
 
 app = Flask(__name__)
 
-slack_token = 'xoxb-503818135714-506852761857-i8QhhD6zrEQlRhAi2qn4yfvD'
+slack_token = 'xoxb-503818135714-506852761857-QIBIrSUj6VgP5VdZIkeIyIJr'
 slack_client_id = '503818135714.507348866547'
 slack_client_secret = '1fb4309701edc44269c681c494bed569'
 slack_verification = 'cupsHgeL0hFVq3B6kz3IWAbY'
@@ -66,6 +66,7 @@ def _event_handler(event_type, slack_event):
         userid = slack_event["event"]["user"]
 
         if text.find("reset") != -1:
+            print("말도안된다")
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
             sc.api_call(
@@ -76,10 +77,12 @@ def _event_handler(event_type, slack_event):
             return make_response("App mention message has been sent", 200, )
 
         if userid not in user_list:
+            print("되고이따11")
             user_list[userid] = []
             feedback = '드라마, 예능, 시사 중 선택해주세요.'
 
         else:
+            print("여기이따22")
             dialog_answer = get_answer(text, userid)
             print(dialog_answer)
             answer = dialog_answer['speech'].split()[1]
@@ -101,6 +104,8 @@ def _event_handler(event_type, slack_event):
                 del user_list[userid]
                 print(feedback)
             print(answer)
+
+        print(feedback)
 
         #keywords = _crawl_naver_keywords(answer)
         sc.api_call(
@@ -151,4 +156,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=8080)
+    app.run('0.0.0.0', port=8000)
