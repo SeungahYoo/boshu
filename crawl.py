@@ -92,7 +92,7 @@ def _crawl_naver_keywords(text):
 
             if(len(times)!=0):
                 for j in range(len(times)) :
-                    table[i]= table[i] + times[j] + " "
+                    table[i]= table[i] + " " + times[j] + " |"
                 timetable.append(table[i])
 
             i+=1
@@ -108,9 +108,9 @@ def _crawl_naver_keywords(text):
 #         result.append(str(i) + "위: " + titles[i - 1] + " / " + artists[i - 1])
 # '''
 
-    result.append(titles[0] + " (" + info[0] + ")")
-    result.append("*편1성* "+sche[0])
-    result.append("<편성표> "+date[0])
+    result.append("*"+titles[0]+"*" + " (" + info[0] + ")")
+    result.append(sche[0])
+    result.append("_<편성표>_ "+date[0])
 
     for i in range(0,len(timetable)):
         result.append(timetable[i])
