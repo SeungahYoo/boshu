@@ -59,6 +59,15 @@ def make_query(text):
         result += ' '
     return result
 
+def talk_bot(text, channel):
+    sc.api_call(
+        "chat.postMessage",
+        channel=channel,
+        text=text
+    )
+
+    return make_response("App mention message has been sent", 200, )
+
 # 이벤트 핸들하는 함수
 def _event_handler(event_type, slack_event):
     print(slack_event["event"])
@@ -69,63 +78,65 @@ def _event_handler(event_type, slack_event):
         userid = slack_event["event"]["user"]
 
         if text.find("reset") != -1:
-            user_list[userid] = []
-            feedback = '드라마, 예능, 시사 중 선택해주세요.'
-
-        if userid not in user_list:
-            print("되고이따11")
-            user_list[userid] = []
-            feedback = '드라마, 예능, 시사 중 선택해주세요.'
+            del user_list[userid]
+            feedback = '나중에 다시 불러주세요'
+            return talk_bot(feedback, channel)
 
         else:
-            print("여기이따22")
-            dialog_answer = get_answer(text, userid)
-            print(dialog_answer)
-            answer = dialog_answer['speech'].split()[1]
-            if len(user_list[userid]) == 0:
-                if answer not in ['드라마', '예능', '시사']:
-                    user_list[userid] = []
-                    feedback = '드라마, 예능, 시사 중 선택해주세요.'
+            if userid not in user_list:
+                print("되고이따11")
+                user_list[userid] = []
+                feedback = '드라마, 예능, 시사 중 선택해주세요.'
+                return talk_bot(feedback, channel)
+
+            else:
+                print("여기이따22")
+                dialog_answer = get_answer(text, userid)
+                print(dialog_answer)
+                answer = dialog_answer['speech'].split()[1]
+                if len(user_list[userid]) == 0:
+                    if answer not in ['드라마', '예능', '시사']:
+                        user_list[userid] = []
+                        feedback = '꼭! 드라마, 예능, 시사 중 선택해주세요.'
+                        return talk_bot(feedback, channel)
+                    else:
+                        user_list[userid].append(answer)
+                        feedback = '제목을 입력해주세요.'
+                        return talk_bot(feedback, channel)
+                elif len(user_list[userid]) == 1:
+                    user_list[userid].append(answer)
+                    feedback = _crawl_naver_keywords(make_query(user_list[userid]))
+                    # user_list[userid] = []
+                    print(feedback)
+                    thumbnail = json.dumps([
+                        {
+                            "color": "#ffffff",
+                            "title": "Program Thumbnail",
+                            "image_url": feedback[0]
+                        }
+                    ])
                     sc.api_call(
                         "chat.postMessage",
                         channel=channel,
-                        text=feedback
+                        attachments=thumbnail
                     )
+                    print(feedback[0])
+                    for i in range(1, len(feedback)):
+                        slack.chat.post_message(channel=channel, text=feedback[i])
+                    # del user_list[userid]
+                    text = 'reset'
                     return make_response("App mention message has been sent", 200, )
-                user_list[userid].append(answer)
-                feedback = '제목을 입력해주세요.'
-            elif len(user_list[userid]) == 1:
-                user_list[userid].append(answer)
-                feedback = _crawl_naver_keywords(make_query(user_list[userid]))
-                user_list[userid] = []
-                print(feedback)
-                thumbnail = json.dumps([
-                    {
-                        "color": "#ffffff",
-                        "title": "Program Thumbnail",
-                        "image_url": feedback[0]
-                    }
-                ])
-                sc.api_call(
-                    "chat.postMessage",
-                    channel=channel,
-                    attachments=thumbnail
-                )
-                print(feedback[0])
-                for i in range(1, len(feedback)):
-                    slack.chat.post_message(channel=channel, text=feedback[i])
-                return make_response("App mention message has been sent", 200, )
-            print(answer)
+                print(answer)
 
         #keywords = _crawl_naver_keywords(answer)
 
         # slack.chat.post_message(channel=channel, text=feedback)
-        sc.api_call(
-            "chat.postMessage",
-            channel=channel,
-            text=feedback
-        )
-
+        # sc.api_call(
+        #     "chat.postMessage",
+        #     channel=channel,
+        #     text=feedback
+        # )
+        #
         return make_response("App mention message has been sent", 200, )
 
     # ============= Event Type Not Found! ============= #
