@@ -91,16 +91,21 @@ def _crawl_naver_keywords(text):
                 if not time.get_text() in times:
                     times.append(time.get_text())
 
-            for index in detail.find_all("em", class_="count"):
-                idx.append(index.get_text())
-                print(idx)
+            # for index in detail.find_all("em", class_="count"):
+            #     print(idx)
+            #
+            #     if index == -1:
+            #         idx.append("1")
+            #     else:
+            #         idx.append(index.get_text())
+
 
             if(len(times)!=0):
-                for j in range(len(times)) :
-                    table[i]= table[i] + " " + times[j] +"(_"+idx[j]+"_) |"
+                for j in range(len(times)):
+                    table[i] = table[i] + " " + times[j] +  " |"
                 timetable.append(table[i])
 
-            i+=1
+            i += 1
 
 
 
@@ -122,7 +127,7 @@ def _crawl_naver_keywords(text):
     #result.append(timetable)
 
 
-    print(result)
+    #print(result)
 
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
@@ -131,6 +136,6 @@ def _crawl_naver_keywords(text):
     return result
 
 if __name__ == '__main__':
-    text="드라마 남자친구"
+    text="시사 생생정보"
     _crawl_naver_keywords(text)
 
